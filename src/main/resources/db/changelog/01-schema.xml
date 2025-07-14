@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- 1. app_user table -->
+    <changeSet id="1-create-app-user" author="usama">
+        <createTable tableName="app_user">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uuid" type="VARCHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="username" type="VARCHAR(40)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 2. roles table -->
+    <changeSet id="2-create-roles" author="usama">
+        <createTable tableName="roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uuid" type="VARCHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- 3. user_roles table -->
+    <changeSet id="3-create-user-roles" author="usama">
+        <createTable tableName="user_roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_uuid" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_uuid" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_name" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="user_roles"
+                columnNames="user_uuid, role_uuid"
+                constraintName="uc_user_roles_unique"/>
+
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="user_uuid"
+                                 constraintName="fk_user_roles_user"
+                                 referencedTableName="app_user"
+                                 referencedColumnNames="uuid"/>
+
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="role_uuid"
+                                 constraintName="fk_user_roles_role"
+                                 referencedTableName="roles"
+                                 referencedColumnNames="uuid"/>
+    </changeSet>
+
+    <!-- 4. permissions table -->
+    <changeSet id="4-create-permissions" author="usama">
+        <createTable tableName="permissions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uuid" type="VARCHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- 5. role_permissions table -->
+    <changeSet id="5-create-role-permissions" author="usama">
+        <createTable tableName="role_permissions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role_uuid" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="permission_uuid" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="role_permissions"
+                columnNames="role_uuid, permission_uuid"
+                constraintName="uc_role_permission_unique"/>
+
+        <addForeignKeyConstraint baseTableName="role_permissions"
+                                 baseColumnNames="role_uuid"
+                                 constraintName="fk_role_permissions_role"
+                                 referencedTableName="roles"
+                                 referencedColumnNames="uuid"/>
+
+        <addForeignKeyConstraint baseTableName="role_permissions"
+                                 baseColumnNames="permission_uuid"
+                                 constraintName="fk_role_permissions_permission"
+                                 referencedTableName="permissions"
+                                 referencedColumnNames="uuid"/>
+    </changeSet>
+
+    <changeSet id="6-create-user-permissions" author="usama">
+        <createTable tableName="user_permissions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_uuid" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="permission_uuid" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="user_permissions"
+                columnNames="user_uuid, permission_uuid"
+                constraintName="uc_user_permission_unique"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_permissions"
+                baseColumnNames="user_uuid"
+                referencedTableName="app_user"
+                referencedColumnNames="uuid"
+                constraintName="fk_user_permissions_user"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_permissions"
+                baseColumnNames="permission_uuid"
+                referencedTableName="permissions"
+                referencedColumnNames="uuid"
+                constraintName="fk_user_permissions_permission"/>
+    </changeSet>
+
+
+</databaseChangeLog>
